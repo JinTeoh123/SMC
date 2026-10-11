@@ -1,6 +1,8 @@
 import discord
 import datetime
 import threading
+import time
+from collections import defaultdict
 import asyncio
 import os
 from flask import Flask
@@ -9,6 +11,8 @@ from collections import deque
 TARGET_ID = None
 TARGET_ROLE_ID = None
 TARGET_CHANNEL_ID = 1477240545695895594
+voice_join_times = {}
+voice_total_times = defaultdict(int)
 voice_clients = {}
 current_song = {}
 loop_enabled = {}
@@ -41,13 +45,13 @@ async def on_ready():
 
 @client.command()
 async def date(ctx):
-    time = datetime.datetime.now()
+    time = datetime.datetime.utcnow() + datetime.timedelta(hours=8)
     formatted_time = time.strftime("%Y-%m-%d %A")
     await ctx.send(f'{formatted_time}')
 
 @client.command()
 async def time(ctx):
-    time = datetime.datetime.now()
+    time = datetime.datetime.utcnow() + datetime.timedelta(hours=8)
     formatted_time = time.strftime("%I:%M:%S %p")
     await ctx.send(f'{formatted_time}')
 
@@ -83,6 +87,37 @@ async def on_voice_state_update(member, before, after):
 
     if has_target_role or is_target_user:
         await member.move_to(None)
+
+    current_time = time.time()
+
+    if before.channel is None and after.channel is not None and not member.bot:
+        voice_join_times[member.id] = current_time
+
+  # 用户从“某个语音频道”离开（变成了 None，或者切到了其他频道）
+    elif before.channel is not None and after.channel is None and not member.bot:
+        if member.id in voice_join_times:
+            duration = current_time - voice_join_times[member.id]
+            voice_total_times[member.id] += int(duration)
+            del voice_join_times[member.id]  # 清除记录
+
+@client.command()
+async def ranking(ctx):
+    if not voice_total_times:
+        await ctx.send("目前还没有记录！")
+        return
+
+    sorted_users = sorted(voice_total_times.items(), key=lambda x: x[1], reverse=True)
+    ranking_message = "语音时长排行榜:\n"
+    for rank, (user_id, total_time) in enumerate(sorted_users[:10], 1):
+        user = ctx.guild.get_member(user_id)
+        name = user.display_name if user else "未知用户"
+
+        hours = total_time // 3600
+        minutes = (total_time % 3600) // 60
+        seconds = total_time % 60
+
+        ranking_message += f"{rank}. {name} - {hours}小时 {minutes}分钟 {seconds}秒\n"
+    await ctx.send(ranking_message)
 
 @client.command()
 async def cleartag(ctx):
