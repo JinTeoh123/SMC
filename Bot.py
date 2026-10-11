@@ -88,17 +88,28 @@ async def on_voice_state_update(member, before, after):
     if has_target_role or is_target_user:
         await member.move_to(None)
 
+@client.event
+async def on_voice_state_update(member, before, after):
     current_time = time.time()
 
     if before.channel is None and after.channel is not None and not member.bot:
         voice_join_times[member.id] = current_time
 
-  # 用户从“某个语音频道”离开（变成了 None，或者切到了其他频道）
     elif before.channel is not None and after.channel is None and not member.bot:
         if member.id in voice_join_times:
             duration = current_time - voice_join_times[member.id]
             voice_total_times[member.id] += int(duration)
             del voice_join_times[member.id]  # 清除记录
+
+    elif (
+      before.channel is not None
+      and after.channel is not None
+      and before.channel.id != after.channel.id
+  ):
+        if member.id in voice_join_times:
+            duration = int(current_time - voice_join_times[member.id])
+            voice_total_times[member.id] += duration
+        voice_join_times[member.id] = current_time
 
 @client.command()
 async def ranking(ctx):
