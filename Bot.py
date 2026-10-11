@@ -1,7 +1,9 @@
 import discord
 import datetime
+import threading
 import asyncio
 import os
+from flask import Flask
 from discord.ext import commands
 from collections import deque
 TARGET_ID = None
@@ -19,6 +21,19 @@ playlist = deque()
 # popleft(): 从头部移除并返回一个元素。加元素 x。
 intents = discord.Intents.all()
 client = commands.Bot(command_prefix = '//', intents=intents)
+
+app = Flask('')
+
+@app.route('//')
+def home():
+  return "I am alive!"
+
+def run():
+  app.run(host='0.0.0.0', port=8080)
+
+def keep_alive():
+  t = threading.Thread(target=run)
+  t.start()
 
 @client.event
 async def on_ready():
@@ -131,6 +146,10 @@ async def join(ctx):
     else:
         await ctx.send("去 TM 的加入一个语音频道",delete_after=2)
         
-client.run(os.getenv("TOKEN"))
+if __name__ == '__main__':
+  # 1. 启动保活服务
+  keep_alive()
+  # 2. 启动 Bot
+  client.run(os.getenv('TOKEN'))
 
 # Done at 2025/5/5 11:46 PM
