@@ -24,7 +24,7 @@ client = commands.Bot(command_prefix = '//', intents=intents)
 
 app = Flask('')
 
-@app.route('//')
+@app.route('/')
 def home():
   return "I am alive!"
 
@@ -97,8 +97,12 @@ async def cleartag(ctx):
 async def cleartagr(ctx):
     global TARGET_ROLE_ID
     TARGET_ROLE_ID = None
-    await ctx.send(f'你们活了')
-
+    if TARGET_ROLE_ID is None:
+            await ctx.send(f'没人中了')
+    else:
+        TARGET_ROLE_ID = None
+        await ctx.send(f'你活了')
+        
 @client.command()
 async def delete(ctx,amount: int):
     if ctx.author == client.user:
