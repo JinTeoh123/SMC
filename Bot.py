@@ -11,6 +11,7 @@ from collections import deque
 TARGET_ID = None
 TARGET_ROLE_ID = None
 TARGET_CHANNEL_ID = 1477240545695895594
+ANONYMOUS_CHANNEL_ID = 
 voice_join_times = {}
 voice_total_times = defaultdict(int)
 voice_clients = {}
@@ -110,6 +111,20 @@ async def on_voice_state_update(member, before, after):
             duration = int(current_time - voice_join_times[member.id])
             voice_total_times[member.id] += duration
         voice_join_times[member.id] = current_time
+
+@client.event
+async def on_message(message):
+    if message.author.bot:
+        return
+
+    if message.guild == None:
+        target_channel = client.get_channel(ANONYMOUS_CHANNEL_ID)
+        if target_channel:
+            await target_channel.send(f"有人说: {message.content}")
+            await message.author.send('你的消息已发送到匿名频道。')
+        return
+
+    await client.process_commands(message)
 
 @client.command()
 async def ranking(ctx):
