@@ -120,7 +120,7 @@ async def on_message(message):
     if message.guild == None:
         target_channel = client.get_channel(ANONYMOUS_CHANNEL_ID)
         if target_channel:
-            await target_channel.send(f"有人说: {message.content}")
+            await target_channel.send(f"{message.author.name}说: {message.content}")
             await message.author.send('你的消息已发送到匿名频道。')
         return
 
