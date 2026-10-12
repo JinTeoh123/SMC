@@ -11,7 +11,7 @@ from collections import deque
 TARGET_ID = None
 TARGET_ROLE_ID = None
 TARGET_CHANNEL_ID = 1477240545695895594
-ANONYMOUS_CHANNEL_ID = 
+ANONYMOUS_CHANNEL_ID = 1477239384599298050
 voice_join_times = {}
 voice_total_times = defaultdict(int)
 voice_clients = {}
