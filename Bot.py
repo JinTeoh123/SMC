@@ -90,29 +90,6 @@ async def on_voice_state_update(member, before, after):
         await member.move_to(None)
 
 @client.event
-async def on_voice_state_update(member, before, after):
-    current_time = time.time()
-
-    if before.channel is None and after.channel is not None and not member.bot:
-        voice_join_times[member.id] = current_time
-
-    elif before.channel is not None and after.channel is None and not member.bot:
-        if member.id in voice_join_times:
-            duration = current_time - voice_join_times[member.id]
-            voice_total_times[member.id] += int(duration)
-            del voice_join_times[member.id]  # 清除记录
-
-    elif (
-      before.channel is not None
-      and after.channel is not None
-      and before.channel.id != after.channel.id
-  ):
-        if member.id in voice_join_times:
-            duration = int(current_time - voice_join_times[member.id])
-            voice_total_times[member.id] += duration
-        voice_join_times[member.id] = current_time
-
-@client.event
 async def on_message(message):
     if message.author.bot:
         return
@@ -125,25 +102,6 @@ async def on_message(message):
         return
 
     await client.process_commands(message)
-
-@client.command()
-async def ranking(ctx):
-    if not voice_total_times:
-        await ctx.send("目前还没有记录！")
-        return
-
-    sorted_users = sorted(voice_total_times.items(), key=lambda x: x[1], reverse=True)
-    ranking_message = "语音时长排行榜:\n"
-    for rank, (user_id, total_time) in enumerate(sorted_users[:10], 1):
-        user = ctx.guild.get_member(user_id)
-        name = user.display_name if user else "未知用户"
-
-        hours = total_time // 3600
-        minutes = (total_time % 3600) // 60
-        seconds = total_time % 60
-
-        ranking_message += f"{rank}. {name} - {hours}小时 {minutes}分钟 {seconds}秒\n"
-    await ctx.send(ranking_message)
 
 @client.command()
 async def cleartag(ctx):
