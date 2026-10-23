@@ -103,6 +103,25 @@ async def on_message(message):
 
     await client.process_commands(message)
 
+@client.event
+async def on_message(message):
+    if message.author.bot:
+        return
+
+    MAX_LENGTH = 50
+    if len(message.content) >= MAX_LENGTH:
+        try:
+            await message.delete()
+            await message.author.send(f"你在 {message.guild.name} 说的话太长了，已被删除。")
+
+        except discord.Forbidden:
+            pass
+        except discord.HTTPException:
+            pass
+        return
+
+    await client.process_commands(message)
+
 @client.command()
 async def cleartag(ctx):
     global TARGET_ID
