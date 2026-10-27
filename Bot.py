@@ -108,7 +108,7 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    MAX_LENGTH = 50
+    MAX_LENGTH = 200
     if len(message.content) >= MAX_LENGTH:
         try:
             await message.delete()
