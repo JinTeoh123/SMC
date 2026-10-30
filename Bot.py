@@ -103,6 +103,7 @@ async def on_message(message):
 
     await client.process_commands(message)
 
+'''
 @client.event
 async def on_message(message):
     if message.author.bot:
@@ -121,6 +122,7 @@ async def on_message(message):
         return
 
     await client.process_commands(message)
+'''
 
 @client.command()
 async def cleartag(ctx):
